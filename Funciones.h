@@ -6,20 +6,20 @@
 #include "ABB.h"
 #include "Lista.h"
 
-void destruirPunteros(Arreglo<Empresa> *&,ABB<string> *&,ABB<int> *&);
-void procesar_archivo_entrada(string,Arreglo<Empresa> *&,ABB<string> *&,ABB<int> *&);
-void crearArbolPosiciones(Arreglo<Empresa> *,ABB<int> *&,int,int);
-void menuPrincipal(Arreglo<Empresa> *&,ABB<string> *&,ABB<int> *&);
-void busquedaPorRango(Arreglo<Empresa> *,unsigned int,unsigned int,Lista<int> &);
+void procesar_archivo_entrada(string,Empresa *&,ABB<string> *&,ABB<int> *&,unsigned int&);
+void crearArbolPosiciones(Empresa*,ABB<int> *&,int,int);
+void destruirPunteros(Empresa *&,ABB<string> *&,ABB<int> *&);
+void menuPrincipal(Empresa *&,unsigned int,ABB<string> *&,ABB<int> *&);
+void busquedaPorRango(Empresa *,unsigned int,unsigned int,Lista<int> &);
 void mostrarEmpresa(Empresa);
 
 /**
- * Abre el archivo seg鷑 el origen, procesa las l韓eas del mismo y
- * almacena la informaci髇 resultante en el contenedor pasado por referencia.
- * Comentarios: atoi y atof requieren un char * para converter a n鷐ero, usamos c_str de la clase string.
+ * Abre el archivo seg煤n el origen, procesa las l铆neas del mismo y
+ * almacena la informaci贸n resultante en el contenedor pasado por referencia.
+ * Comentarios: atoi y atof requieren un char * para converter a n煤mero, usamos c_str de la clase string.
  */
-void procesar_archivo_entrada(string origen,Arreglo<Empresa> *&arr_empresas,ABB<string> *&arbol_razonsocial,
-                              ABB<int> *&arbol_posiciones)
+void procesar_archivo_entrada(string origen,Empresa *&empresas,ABB<string> *&arbol_razonsocial,
+                              ABB<int> *&arbol_posiciones,unsigned int &size_arreglo)
 {
     ifstream archivo(origen);
     if (!archivo.is_open())
@@ -29,7 +29,8 @@ void procesar_archivo_entrada(string origen,Arreglo<Empresa> *&arr_empresas,ABB<
         getline(archivo, linea);
         int cantidad_empresas = atoi(linea.c_str());
 
-        arr_empresas = new Arreglo<Empresa>(cantidad_empresas);
+        size_arreglo = cantidad_empresas;
+        empresas = new Empresa[cantidad_empresas];
         arbol_razonsocial = new ABB<string>;
         arbol_posiciones = new ABB<int>;
 
@@ -37,39 +38,40 @@ void procesar_archivo_entrada(string origen,Arreglo<Empresa> *&arr_empresas,ABB<
         int posicion_ranking = 0;
         while (getline(archivo, linea)) {
 
-            //Primer posici髇 del separador ;
+            //Primer posici贸n del separador ;
             int pos_inicial = 0;
             int pos_final = linea.find(';');
 
             //Informacion entre pos_inicial y pos_final
             string razon_social = linea.substr(pos_inicial, pos_final);
 
-            //Segunda posici髇 del separador ;
+            //Segunda posici贸n del separador ;
             pos_inicial = pos_final + 1;
             pos_final = linea.find(';', pos_inicial);
             string pais_origen = linea.substr(pos_inicial, pos_final - pos_inicial);
 
-            //Tercera posici髇 del separador ;
+            //Tercera posici贸n del separador ;
             pos_inicial = pos_final + 1;
             pos_final = linea.find(';', pos_inicial);
             unsigned int empleados = atoi(linea.substr(pos_inicial, pos_final - pos_inicial).c_str());
 
-            //Cuarta posici髇 del separador ;
+            //Cuarta posici贸n del separador ;
             pos_inicial = pos_final + 1;
             pos_final = linea.find(';', pos_inicial);
             string rubro = linea.substr(pos_inicial, pos_final - pos_inicial);
 
             Empresa empresa_leida(razon_social,pais_origen,empleados,rubro);
-            arr_empresas->agregarElemento(empresa_leida);
+            //arr_empresas->agregarElemento(empresa_leida);
+            empresas[posicion_ranking] = empresa_leida;
             posicion_ranking+=1;
 
-            arbol_razonsocial->agregarElemento(arr_empresas,posicion_ranking);
+            arbol_razonsocial->agregarElemento(empresas,posicion_ranking);
         }
-        crearArbolPosiciones(arr_empresas,arbol_posiciones,1,arr_empresas->obtenerCantidadElementos());
+        crearArbolPosiciones(empresas,arbol_posiciones,1,size_arreglo);
     }
 }
 
-void crearArbolPosiciones(Arreglo<Empresa> *empresas,ABB<int> *&arbol_posiciones,int inferior,int superior){
+void crearArbolPosiciones(Empresa *empresas,ABB<int> *&arbol_posiciones,int inferior,int superior){
     /* Crea un arbol balanceado aprovechando que se tiene el arreglo ordenado por posiciones*/
     if (inferior <= superior){
         int mitad = (superior+inferior)/2;
@@ -79,8 +81,8 @@ void crearArbolPosiciones(Arreglo<Empresa> *empresas,ABB<int> *&arbol_posiciones
     }else{ return ;}
 }
 
-void destruirPunteros(Arreglo<Empresa> *&arreglo_empresas,ABB<string> *&arbol_razonsocial,ABB<int> *&arbol_posiciones){
-    delete arreglo_empresas;
+void destruirPunteros(Empresa *&arreglo_empresas,ABB<string> *&arbol_razonsocial,ABB<int> *&arbol_posiciones){
+    delete[] arreglo_empresas;
     delete arbol_razonsocial;
     delete arbol_posiciones;
     arreglo_empresas = NULL;
@@ -88,10 +90,10 @@ void destruirPunteros(Arreglo<Empresa> *&arreglo_empresas,ABB<string> *&arbol_ra
     arbol_posiciones = NULL;
 }
 
-void busquedaPorRango(Arreglo<Empresa> *arreglo_empresas,unsigned int inferior,unsigned int superior,Lista<int> &lista){
-    int limite = arreglo_empresas->obtenerCantidadElementos();
-    for (int i=0;i<limite;i++){
-        unsigned int empleados = arreglo_empresas->obtenerDatos(i+1).obtenerEmpleados();
+void busquedaPorRango(Empresa *arreglo_empresas,unsigned int size_arreglo,unsigned int inferior,unsigned int superior,
+                      Lista<int> &lista){
+    for (int i=0;i<size_arreglo;i++){
+        unsigned int empleados = arreglo_empresas[i].obtenerEmpleados();
         if ((empleados >= inferior)&&(empleados <= superior)){
             lista.agregarElemento(i+1);
         }
@@ -105,7 +107,7 @@ void mostrarEmpresa(Empresa emp_mostrar){
     cout<<"\n Cantidad de empleados: "<<emp_mostrar.obtenerEmpleados()<<endl;
 }
 
-void menuPrincipal(Arreglo<Empresa> *&empresas,ABB<string> *&arbol_razonsocial,ABB<int> *&arbol_posiciones){
+void menuPrincipal(Empresa *&empresas,unsigned int size_arreglo,ABB<string> *&arbol_razonsocial,ABB<int> *&arbol_posiciones){
     char input_usuario='a';
     do{
         fflush(stdin);
@@ -119,7 +121,7 @@ void menuPrincipal(Arreglo<Empresa> *&empresas,ABB<string> *&arbol_razonsocial,A
         cin>>input_usuario;
 
         switch(input_usuario){
-            case '1':{ //Obtener la posici髇 en el ranking para una empresa en particular.
+            case '1':{ //Obtener la posici贸n en el ranking para una empresa en particular.
                 fflush(stdin);
                 system("cls");
                 string empresa_ingresada = "";
@@ -134,7 +136,7 @@ void menuPrincipal(Arreglo<Empresa> *&empresas,ABB<string> *&arbol_razonsocial,A
                 }
                 break;
                 }
-            case '2':{ //Obtener la informaci髇 de la empresa que se encuentra en una posici髇 determinada.
+            case '2':{ //Obtener la informaci贸n de la empresa que se encuentra en una posici贸n determinada.
                 fflush(stdin);
                 system("cls");
                 string pos_ingresada;
@@ -157,7 +159,7 @@ void menuPrincipal(Arreglo<Empresa> *&empresas,ABB<string> *&arbol_razonsocial,A
                 }
                 break;
                 }
-            case '3':{ //Listar las empresas, y su posici髇, con un n鷐ero de empleados dentro de un rango especificado.
+            case '3':{ //Listar las empresas, y su posici贸n, con un n煤mero de empleados dentro de un rango especificado.
                 fflush(stdin);
                 system("cls");
                 string minimo,maximo;
@@ -178,14 +180,14 @@ void menuPrincipal(Arreglo<Empresa> *&empresas,ABB<string> *&arbol_razonsocial,A
                 }
 
                 Lista<int> lista_rango;
-                busquedaPorRango(empresas,limite_inf,limite_sup,lista_rango);
+                busquedaPorRango(empresas,size_arreglo,limite_inf,limite_sup,lista_rango);
                 if (!lista_rango.listaVacia()){
                     lista_rango.inicializarCursor();
                     unsigned int pos_a_buscar;
                     while (!lista_rango.cursorFinal()){
                         pos_a_buscar = lista_rango.obtenerElementoCursor();
                         cout<<"\n Posicion: "<<pos_a_buscar;
-                        mostrarEmpresa(empresas->obtenerDatos(pos_a_buscar));
+                        mostrarEmpresa(empresas[pos_a_buscar-1]);
                         lista_rango.avanzarCursor();
                     }
                 }else{
