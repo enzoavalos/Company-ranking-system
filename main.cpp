@@ -6,21 +6,21 @@ using namespace std;
 #include<stdlib.h>
 #include<conio.h>
 
-#include "headers/Empresa.h"
-#include "headers/Arreglo.h"
-#include "headers/ABB.h"
-#include "headers/Funciones.h"
-#include "headers/PST.h"
+#include "Company.h"
+#include "BST.h"
+#include "Functions.h"
+#include "PST.h"
 
 int main()
 {
-    Empresa *empresas = NULL;
-    unsigned int tamanio_arreglo;
-    ABB<string> *arbol_razonsocial;
-    ABB<int> *arbol_posiciones;
+    Company *companies = NULL;
+    unsigned int array_size = 0;
+    BST<string> *bst_by_name = NULL;
+    BST<int> *bst_by_position = NULL;
+    PST *priority_tree = NULL;
 
-    procesar_archivo_entrada("ranking_empresas.csv",empresas,arbol_razonsocial,arbol_posiciones,tamanio_arreglo);
-    menuPrincipal(empresas,tamanio_arreglo,arbol_razonsocial,arbol_posiciones);
+    processInputFile("company_ranking.csv",companies,bst_by_name,bst_by_position,array_size,priority_tree);
+    mainMenu(companies,array_size,bst_by_name,bst_by_position,priority_tree);
 
     return 0;
 }

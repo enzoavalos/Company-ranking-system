@@ -1,136 +1,140 @@
-#include "headers/PST.h"
+#include "PST.h"
 #include<assert.h>
 
 PST::PST(){
 }
 
-PST::PST(Empresa *empresas,unsigned int tamanio_arreglo){
-    assert(empresas != NULL);
-    Nodo *arr_auxiliar[tamanio_arreglo];
+PST::PST(Company *companies,unsigned int array_size){
+    assert(companies != NULL);
+    Node *auxiliary_array[array_size];
 
-    for (int i=0;i<tamanio_arreglo;i++){
-        arr_auxiliar[i] = new Nodo;
-        arr_auxiliar[i]->empresa = &empresas[i];
-        arr_auxiliar[i]->posicion = i+1;
-        arr_auxiliar[i]->empleados = empresas[i].obtenerEmpleados();
+    for (int i=0;i<array_size;i++){
+        auxiliary_array[i] = new Node;
+        auxiliary_array[i]->company = &companies[i];
+        auxiliary_array[i]->priority = i+1;
+        auxiliary_array[i]->employees = companies[i].getEmployees();
     }
-    construirPST(nodo,arr_auxiliar,0,tamanio_arreglo-1);
+    buildPst(node,auxiliary_array,0,array_size-1);
 }
 
-void PST::construirPST(Nodo *&padre,Nodo *subarreglo[],int inicio,int fin){
-    if (inicio > fin){
+void PST::buildPst(Node *&parent,Node *subarray[],int start,int end){
+    if (start > end){
         return;
-    }else if(inicio == fin){
-        padre = subarreglo[inicio];
+    }else if(start == end){
+        parent = subarray[start];
     }else{
-        //cout<<"bien"<<endl;
-        int pos_menor_prior = ubicarElementoMenorPrioridad(subarreglo,inicio,fin);
-        if (pos_menor_prior != inicio){
-            Nodo *aux = subarreglo[inicio];
-            subarreglo[inicio] = subarreglo[pos_menor_prior];
-            subarreglo[pos_menor_prior] = aux;
+        int position_least_priority = locateLeastPriorityElement(subarray,start,end); //O(n)
+        if (position_least_priority != start){
+            Node *aux = subarray[start];
+            subarray[start] = subarray[position_least_priority];
+            subarray[position_least_priority] = aux;
         }
 
-        mergeSort(subarreglo,inicio+1,fin);
-        int indice_mediana = -1;
-        int mediana = calcularMediana(subarreglo,inicio+1,fin,indice_mediana);
+        mergeSort(subarray,start+1,end);  //O(n * log n)
+        int median_index = -1;
+        int median = calculateMedian(subarray,start+1,end,median_index);  //O(1)
 
-        padre = subarreglo[inicio];
-        padre->clave_distribucion = mediana;
+        parent = subarray[start];
+        parent->distribution_key = median;
 
-        construirPST(padre->izq,subarreglo,inicio+1,indice_mediana);
-        construirPST(padre->der,subarreglo,indice_mediana+1,fin);
+        buildPst(parent->left,subarray,start+1,median_index);  //O(n * log n)
+        buildPst(parent->right,subarray,median_index+1,end);     //O(n * log n)
     }
 }
 
-void PST::eliminar(Nodo *&nodo){
-    if (nodo != NULL){
-        eliminar(nodo->izq);
-        eliminar(nodo->der);
+void PST::_delete(Node *&node){
+    if (node != NULL){
+        _delete(node->left);
+        _delete(node->right);
     }
-    delete nodo;
-    nodo = NULL;
+    delete node;
+    node = NULL;
 }
 
 PST::~PST(){
-    eliminar(nodo);
+    _delete(node);
 }
 
-void PST::mergeSort(Nodo *subarreglo[],int l,int r){
-    /*Complejidad O(n*log n)*/
+void PST::mergeSort(Node *subarray[],int l,int r) const{
 	int m;
 	if(l<r){
 		int m = (l+r) / 2;
-		//Ordenamos primer y segundo array
-		mergeSort(subarreglo,l,m);
-		mergeSort(subarreglo,m+1,r);
-		merge(subarreglo,l,r,m);
+		mergeSort(subarray,l,m);
+		mergeSort(subarray,m+1,r);
+		merge(subarray,l,r,m);
 	}else{
 		return;
 	}
 }
 
-void PST::merge(Nodo *subarreglo[],int left,int right,int middle){
+void PST::merge(Node *subarray[],int left,int right,int middle) const{
 	int n1 = middle - left +1;
 	int n2 = right - middle;
-	Nodo *l_array[n1],*r_array[n2];
+	Node *l_array[n1],*r_array[n2];
 
 	for (int x=0; x < n1; x++)
-        l_array[x] = subarreglo[left + x];
+        l_array[x] = subarray[left + x];
     for (int z = 0; z < n2; z++)
-        r_array[z] = subarreglo[middle + 1 + z];
+        r_array[z] = subarray[middle + 1 + z];
 
 	int i=0,j=0,k=left;
 	while ((i < n1)&&(j < n2)){
-		if (l_array[i]->empleados <= r_array[j]->empleados){
-			subarreglo[k] = l_array[i];
+		if (l_array[i]->employees <= r_array[j]->employees){
+			subarray[k] = l_array[i];
 			i++;
 		}else{
-			subarreglo[k] = r_array[j];
+			subarray[k] = r_array[j];
 			j++;
 		}
 		k++;
 	}
 
 	while (i < n1) {
-        subarreglo[k] = l_array[i];
+        subarray[k] = l_array[i];
         i++;
         k++;
     }
 
     while (j < n2) {
-        subarreglo[k] = r_array[j];
+        subarray[k] = r_array[j];
         j++;
         k++;
     }
 }
 
-int PST::calcularMediana(Nodo *arreglo_ordenado[],unsigned int left, unsigned int right,int &indice){
-    indice = (right+left)/2;
-    return arreglo_ordenado[indice]->empleados;
+int PST::calculateMedian(Node *ordered_array[],unsigned int left, unsigned int right,int &index) const{
+    index = (right+left)/2;
+    return ordered_array[index]->employees;
 }
 
-int PST::ubicarElementoMenorPrioridad(Nodo *subarreglo[],int inicio,int fin){
-    if (inicio >= fin){ return inicio;}
-    int menor_prioridad = subarreglo[inicio]->posicion;
-    int pos_menor = inicio;
-    for (int i=inicio+1;i<fin;i++){
-        if (subarreglo[i]->posicion < menor_prioridad){
-            menor_prioridad = subarreglo[i]->posicion;
-            pos_menor = i;
+int PST::locateLeastPriorityElement(Node *subarray[],int start,int end) const{
+    if (start >= end){ return start;}
+    int least_priority = subarray[start]->priority;
+    int position_least_priority = start;
+    for (int i=start+1;i<end;i++){
+        if (subarray[i]->priority < least_priority){
+            least_priority = subarray[i]->priority;
+            position_least_priority = i;
         }
     }
-    return pos_menor;
+    return position_least_priority;
 }
 
-void PST::recorrer(Nodo *nodo){
-    if (nodo != NULL){
-        recorrer(nodo->izq);
-        cout<<nodo->posicion<<endl;
-        recorrer(nodo->der);
+void PST::searchCompanies(List<Company*> &list,Node *node,int priority,int minimum,int maximum){
+    if (node != NULL){
+        if (node->priority > priority){ return;}
+        if ((node->employees >=minimum)&&(node->employees <= maximum)){
+            list.addElement(node->company);
+        }
+        if (minimum < node->distribution_key){
+            searchCompanies(list,node->left,priority,minimum,maximum);
+        }
+        if (maximum > node->distribution_key){
+            searchCompanies(list,node->right,priority,minimum,maximum);
+        }
     }
 }
 
-void PST::mostrar(){
-    recorrer(nodo);
+void PST::searchCompaniesByPriority(List<Company*> &list_by_priority,int priority,int inf_limit,int sup_limit){
+    searchCompanies(list_by_priority,node,priority,inf_limit,sup_limit);
 }

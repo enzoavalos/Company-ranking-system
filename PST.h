@@ -1,33 +1,34 @@
 #ifndef PST_H_INCLUDED
 #define PST_H_INCLUDED
 
-#include "Empresa.h"
+#include "Company.h"
+#include "List.h"
 
 class PST{
     private:
-        struct Nodo{
-            Empresa *empresa;
-            unsigned int posicion;
-            unsigned int empleados;
-            int clave_distribucion = -1;
-            Nodo *izq = NULL;
-            Nodo *der = NULL;
+        struct Node{
+            Company *company = NULL;
+            unsigned int priority;
+            unsigned int employees;
+            int distribution_key = -1;
+            Node *left = NULL;
+            Node *right = NULL;
         };
-        Nodo *nodo = NULL;
+        Node *node = NULL;
 
-        int ubicarElementoMenorPrioridad(Nodo *[],int,int);
-        void construirPST(Nodo *&,Nodo *[],int,int);
-        void mergeSort(Nodo *[],int,int);
-        void merge(Nodo *[],int,int,int);
-        void eliminar(Nodo *&);
-        int calcularMediana(Nodo *[],unsigned int,unsigned int,int&);
-        void recorrer(Nodo *);
+        int locateLeastPriorityElement(Node *[],int,int) const;
+        void buildPst(Node *&,Node *[],int,int);
+        void mergeSort(Node *[],int,int) const;
+        void merge(Node *[],int,int,int) const;
+        void _delete(Node *&);
+        int calculateMedian(Node *[],unsigned int,unsigned int,int&) const;
+        void searchCompanies(List<Company*>&,Node *,int,int,int);
 
     public:
         PST();
-        PST(Empresa *,unsigned int);
+        PST(Company *,unsigned int);
         ~PST();
-        void mostrar();
+        void searchCompaniesByPriority(List<Company*>&,int,int,int);
 };
 
 #endif // PST_H_INCLUDED
