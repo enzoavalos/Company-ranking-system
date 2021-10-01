@@ -4,7 +4,7 @@
 
 ##
 ### About the project:
-Project developed for "Analisis and Design of algorithms I" of System Engineering.
+Project developed for "Analisis and Design of Algorithms I" of System Engineering.
 
 ## 
 ### Topics involved:
