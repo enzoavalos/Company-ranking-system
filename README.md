@@ -2,6 +2,10 @@
 ### Rankign system for the top companies to work for, according to employees opinions!   
 ### It provides varous efficient search services for user queries.
 
+##
+### About the project:
+Project developed for "Analisis and Design of algorithms I" of System Engineering.
+
 ## 
 ### Topics involved:
 - Binary search trees
