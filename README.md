@@ -31,7 +31,7 @@ Project developed for "Analisis and Design of Algorithms I" of System Engineerin
 The app consists of a ranking that contains information about the best companies to work for, such as its legal name, work area, amount of employees and country of origin. All of this information is extracted from the company_ranking.csv file included in the repo.   
 It offers different search services that retrieve certain companies based on user queries. Each service is implemented with a particular auxiliary data structure built upon an array with the actual information, specifically selected based on the characteristics of the particular service, to improve its performance and theoretical complexity.    
 The search services offered are:
-- Get the position in the ranking given a certain company.
+- Get the position in the ranking of a certain given company.
 - Get the information of the company in a given position.
 - List the companies with an amount of employees within a given range.
 - List the "n" first companies of the ranking with an amount of employees within a given range.
